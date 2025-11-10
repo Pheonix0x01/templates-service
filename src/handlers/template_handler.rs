@@ -1,9 +1,8 @@
-filepath: src/handlers/template_handler.rs
 use crate::error::AppError;
 use crate::models::{ApiResponse, CreateTemplateRequest, TemplateResponse, TemplateType};
 use crate::services::{RenderService, TemplateService};
 use actix_web::{web, HttpResponse};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -22,11 +21,6 @@ pub struct RenderQuery {
 #[derive(Debug, Deserialize)]
 pub struct RenderRequest {
     pub variables: HashMap<String, Value>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct RenderResponse {
-    pub rendered: Value,
 }
 
 pub async fn create_template(

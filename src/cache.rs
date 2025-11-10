@@ -1,4 +1,3 @@
-filepath: src/cache.rs
 use redis::aio::ConnectionManager;
 use redis::{Client, RedisError};
 

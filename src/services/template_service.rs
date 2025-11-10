@@ -4,7 +4,6 @@ use crate::error::AppError;
 use crate::models::{CreateTemplateRequest, Template, TemplateType};
 use redis::AsyncCommands;
 use sqlx::Row;
-use uuid::Uuid;
 
 pub struct TemplateService {
     pool: DbPool,

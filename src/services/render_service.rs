@@ -1,4 +1,3 @@
-filepath: src/services/render_service.rs
 use crate::cache::RedisPool;
 use crate::config::Config;
 use crate::error::AppError;

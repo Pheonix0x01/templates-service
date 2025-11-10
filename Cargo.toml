@@ -1,4 +1,3 @@
-filepath: Cargo.toml
 [package]
 name = "templates-service"
 version = "0.1.0"
@@ -24,8 +23,10 @@ hex = "0.4"
 thiserror = "1.0"
 jsonwebtoken = "9.3"
 lazy_static = "1.5"
+futures = "0.3"
 utoipa = { version = "4.2", features = ["actix_extras", "uuid"] }
 utoipa-swagger-ui = { version = "7.1", features = ["actix-web"] }
 
 [dev-dependencies]
 actix-rt = "2.10"
+serial_test = "3.2"
