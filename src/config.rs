@@ -7,6 +7,7 @@ pub struct Config {
     pub server_host: String,
     pub server_port: u16,
     pub jwt_secret: String,
+    pub secret_key: String,
     pub max_rendered_size_kb: usize,
     pub template_cache_ttl_secs: u64,
     pub rendered_cache_ttl_secs: u64,
@@ -29,6 +30,8 @@ impl Config {
                 .expect("SERVER_PORT must be a valid u16"),
             jwt_secret: env::var("JWT_SECRET")
                 .expect("JWT_SECRET must be set"),
+            secret_key: env::var("SECRET_KEY")
+                .expect("SECRET_KEY must be set"),    
             max_rendered_size_kb: env::var("MAX_RENDERED_SIZE_KB")
                 .unwrap_or_else(|_| "64".to_string())
                 .parse()

@@ -26,6 +26,7 @@ lazy_static = "1.5"
 futures = "0.3"
 utoipa = { version = "4.2", features = ["actix_extras", "uuid"] }
 utoipa-swagger-ui = { version = "7.1", features = ["actix-web"] }
+home = "=0.5.11"
 
 [dev-dependencies]
 actix-rt = "2.10"

@@ -1,0 +1,13 @@
+target/
+.env
+.git/
+*.md
+.gitignore
+Dockerfile
+docker-compose.yml
+tests/
+.pytest_cache/
+__pycache__/
+*.pyc
+.vscode/
+.idea/

@@ -14,7 +14,7 @@ use crate::config::Config;
 use crate::handlers::{
     create_template, delete_template, get_template, get_versions, health, ready, render_template,
 };
-use crate::middleware::Metrics;
+use crate::middleware::{Auth, Metrics};
 use crate::services::{RenderService, TemplateService};
 
 async fn metrics_handler() -> HttpResponse {
@@ -64,6 +64,7 @@ async fn main() -> std::io::Result<()> {
 
     let db_data = web::Data::new(db_pool);
     let redis_data = web::Data::new(redis_pool);
+    let jwt_secret = config.jwt_secret.clone();
 
     let server_address = config.server_address();
 
@@ -80,13 +81,13 @@ async fn main() -> std::io::Result<()> {
             .route("/metrics", web::get().to(metrics_handler))
             .service(
                 web::scope("/api/v1/templates")
-                    .route("/", web::post().to(create_template))
+                    .route("/", web::post().to(create_template).wrap(Auth::new(jwt_secret.clone())))
                     .route("/{template_code}", web::get().to(get_template))
                     .route("/{template_code}/render", web::post().to(render_template))
                     .route("/{template_code}/versions", web::get().to(get_versions))
                     .route(
                         "/{template_code}/{version}",
-                        web::delete().to(delete_template),
+                        web::delete().to(delete_template).wrap(Auth::new(jwt_secret.clone())),
                     ),
             )
     })

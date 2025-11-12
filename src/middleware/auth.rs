@@ -2,7 +2,7 @@ use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::{Error, HttpMessage, HttpResponse};
 use futures::future::{ok, Ready};
 use futures::Future;
-use jsonwebtoken::{decode, DecodingKey, Validation};
+use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -11,7 +11,8 @@ use std::task::{Context, Poll};
 pub struct Claims {
     pub sub: String,
     pub exp: usize,
-    pub service: String,
+    #[serde(rename = "type")]
+    pub token_type: String,
 }
 
 pub struct Auth {
@@ -64,13 +65,6 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let path = req.path();
-
-        if path == "/health" || path == "/metrics" {
-            let fut = self.service.call(req);
-            return Box::pin(async move { fut.await });
-        }
-
         let auth_header = req.headers().get("Authorization");
 
         if auth_header.is_none() {
@@ -90,7 +84,8 @@ where
         let token = auth_str.strip_prefix("Bearer ").unwrap_or("");
 
         let jwt_secret = self.jwt_secret.clone();
-        let validation = Validation::default();
+        let mut validation = Validation::new(Algorithm::HS256);
+        validation.validate_exp = true;
 
         match decode::<Claims>(
             token,
@@ -98,20 +93,36 @@ where
             &validation,
         ) {
             Ok(token_data) => {
+                if token_data.claims.token_type != "access" {
+                    return Box::pin(async {
+                        let response = HttpResponse::Unauthorized().json(serde_json::json!({
+                            "success": false,
+                            "data": serde_json::Value::Null,
+                            "error": "unauthorized",
+                            "message": "Invalid token type",
+                            "meta": serde_json::Value::Null,
+                        }));
+                        Err(actix_web::error::InternalError::from_response("", response).into())
+                    });
+                }
+                
                 req.extensions_mut().insert(token_data.claims);
                 let fut = self.service.call(req);
                 Box::pin(async move { fut.await })
             }
-            Err(_) => Box::pin(async {
-                let response = HttpResponse::Unauthorized().json(serde_json::json!({
-                    "success": false,
-                    "data": serde_json::Value::Null,
-                    "error": "unauthorized",
-                    "message": "Invalid token",
-                    "meta": serde_json::Value::Null,
-                }));
-                Err(actix_web::error::InternalError::from_response("", response).into())
-            }),
+            Err(err) => {
+                tracing::warn!("JWT validation failed: {:?}", err);
+                Box::pin(async {
+                    let response = HttpResponse::Unauthorized().json(serde_json::json!({
+                        "success": false,
+                        "data": serde_json::Value::Null,
+                        "error": "unauthorized",
+                        "message": "Invalid or expired token",
+                        "meta": serde_json::Value::Null,
+                    }));
+                    Err(actix_web::error::InternalError::from_response("", response).into())
+                })
+            }
         }
     }
 }
