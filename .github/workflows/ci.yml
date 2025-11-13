@@ -31,6 +31,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/templates_db
           REDIS_URL: redis://localhost:6379
           SECRET_KEY: test-secret-key-for-ci
+          JWT_SECRET: test-secret-key-for-ci
           SERVER_HOST: 0.0.0.0
           SERVER_PORT: 8080
         run: cargo test --verbose
