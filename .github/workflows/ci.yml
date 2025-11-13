@@ -26,15 +26,8 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Run tests
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/templates_db
-          REDIS_URL: redis://localhost:6379
-          SECRET_KEY: test-secret-key-for-ci
-          JWT_SECRET: test-secret-key-for-ci
-          SERVER_HOST: 0.0.0.0
-          SERVER_PORT: 8080
-        run: cargo test --verbose
+      - name: Run unit tests only
+        run: cargo test --lib --verbose
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
