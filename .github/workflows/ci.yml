@@ -1,4 +1,3 @@
-filepath: /home/sable/work/phoenix/distributed-notification-system/templates-service/.github/workflows/ci.yml
 name: CI Build & Push to Docker Hub
 
 on:
@@ -28,6 +27,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/templates_db
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test-secret-key-for-ci
+          SERVER_HOST: 0.0.0.0
+          SERVER_PORT: 8080
         run: cargo test --verbose
 
       - name: Set up Docker Buildx
